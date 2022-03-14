@@ -1,0 +1,11 @@
+{
+  "domain": "vegvesenScraper",
+  "name": "vegvesenScraper",
+  "version": "1.0.0",
+  "documentation": "https://github.com/Bolme123/atb_sanntid_hassio",
+  "dependencies": [],
+  "codeowners": [
+    "@bolme123"
+  ],
+  "requirements": []
+}

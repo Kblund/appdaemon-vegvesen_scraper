@@ -1,0 +1,11 @@
+
+Plan
+
+
+        En del av programmet ser alltid etter kjøretimer.
+        hvis programmet finner en kjøretime til ønsket tidspunkt
+        (innenfor ei tidsramme mellom 22.03 - 05.04 )
+        book timen. 
+        Om det skull oppstå det kjæm en time som e nærmar den 31.mars, t tross for at æ har booka
+        avbestill time, book ny
+        
