@@ -1,4 +1,4 @@
-from vegvesenScrape import vegvesen_scraper
+from modules.vegvesenScrape import vegvesen_scraper
 import time
 """
 Bruk fetch_class og cycle_station fra vegvesen_scraper for å hent informasjonen i tidsintervella
@@ -49,11 +49,17 @@ class KjoretimeListener:
         return
 
     def compareClasses(self):
-
+        k=k
     def dateExtractor(self,class_list): # Tar imot output fra hentKjoretimer()
         
         if self.new_flag:
-            parsed = self.current_vs().
+            parsed = self.current_vs().InfluxDBify()
             
 
+    def kryperCookie(self):
+        import subprocess, base64
+        cookie = subprocess.run(["grep", ".", "./const/cookie"], capture_output=True).stdout[8:-1]
+        encoded_cookie = base64.b64encode(cookie)
+        
+        return encoded_cookie
     
