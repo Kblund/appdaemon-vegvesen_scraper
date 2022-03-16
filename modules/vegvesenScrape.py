@@ -1,6 +1,6 @@
 from email.mime import base
 import json, requests, time, base64, datetime
-import InfluxDB_sync
+from modules import InfluxDB_sync
 from os import path
 
 

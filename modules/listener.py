@@ -1,4 +1,4 @@
-from vegvesenScrape import vegvesen_scraper
+from modules.vegvesenScrape import vegvesen_scraper
 import time
 """
 Bruk fetch_class og cycle_station fra vegvesen_scraper for å hent informasjonen i tidsintervella
@@ -41,6 +41,7 @@ class KjoretimeListener:
             if (current_time - self.last_time ) < self.INTERVAL_TIMER:
                 time_flag = False
                 self.hentKjoretimer()
+            time.sleep(self.INTERVAL_TIMER)
     
     def hentKjoretimer(self):
         self.current_vs = vegvesen_scraper()
@@ -49,11 +50,12 @@ class KjoretimeListener:
         return
 
     def compareClasses(self):
-
-    def dateExtractor(self,class_list): # Tar imot output fra hentKjoretimer()
+        k = 0
+    def dateExtractor(self): # Tar imot output fra hentKjoretimer()
         
         if self.new_flag:
-            parsed = self.current_vs().
-            
-
+            parsed = self.current_vs().parse_dict()
+            print(parsed)
+        else:
+            return
     
