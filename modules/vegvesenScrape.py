@@ -1,22 +1,22 @@
 from email.mime import base
 import json, requests, time, base64, datetime
-from modules import InfluxDB_sync
+import InfluxDB_sync
 from os import path
-
+import threading
+import time
 
 
 
 
 class vegvesen_scraper:
-        cookie_dir = r"./const/cookie"
+        thresh_date = datetime.datetime(2022,3,24)
+        cookie_dir = b".\const\cookie"
         params = {"v":2,"arbeidsflytId":452606344,"klasse":"B"} # parametrene "v", arbeidsflytId, klasse
         traffic_stations=[471,741,761,491,751]
         url = "https://forerett-adapter.atlas.vegvesen.no/provetimer"
 
         def __init__(self):
             self.all_classes = []
-
-            self.cycle_station()    
 
         def fetch_class(self,station):
             def decode_cookie():
@@ -38,11 +38,14 @@ class vegvesen_scraper:
             else:
                 return res.json()
 
-        def cycle_station(self):                                    # Hjelpefunksjon for å iterere gjennom alle kjørestasjonene
+        def cycle_station(self):
+            if self.all_classes:
+                self.all_classes.clear()                                    # Hjelpefunksjon for å iterere gjennom alle kjørestasjonene
             for station in self.traffic_stations:
                 classes = self.fetch_class(station)
                 if classes:
                   self.all_classes.append(classes)
+            return
 
         def Sorter(self):
             driving_classes = {}
@@ -85,3 +88,30 @@ class vegvesen_scraper:
                 full_string = full_string
                 )
             #traffic_station,date_class,time_class,datetime_class
+
+        
+        def scheduler(self):
+            time_flag = False
+            t = threading.Timer(interval = 10,function =self.cycle_station)
+            t.daemon = True
+            t.start()
+            t.join()
+
+
+if __name__ == '__main__':
+    starttime = time.time()
+    k = vegvesen_scraper()
+
+    clear = "\n" * 3
+    while True:
+        k.cycle_station()
+        print(clear*33)
+        for trafikkstasjon in k.all_classes:
+            for kjoretime in trafikkstasjon:
+                tid = datetime.datetime.strptime(kjoretime["start"], "%Y-%m-%dT%H:%M:%S")
+                if tid >= k.thresh_date:
+                    print("%s %s - %s" % (clear,kjoretime["oppmotested"],kjoretime["start"]))
+                    
+
+
+        time.sleep(30.0- ((time.time() - starttime) % 30.0))

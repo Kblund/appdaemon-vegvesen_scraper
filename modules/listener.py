@@ -1,5 +1,5 @@
 from modules.vegvesenScrape import vegvesen_scraper
-import time
+import time, threading
 """
 Bruk fetch_class og cycle_station fra vegvesen_scraper for å hent informasjonen i tidsintervella
 
@@ -20,37 +20,27 @@ Er annja program t å booke/avbestill
 
 """
 class KjoretimeListener:
-
+    PREFERED_DATE ="31-03"
     INTERVAL_TIMER = 60/2 # Endre for å justere tid mellom forespørsler
    
     def __init__(self):
         last_time = 0
         new_flag = False
-        current_classes = []
+        current_classes : list
         current_vs : vegvesen_scraper
 
     def scheduler(self):
         time_flag = False
+        t = threading.Timer(interval = 10,function =self.hentKjoretimer)
+        t.start()
+        t.join()
         
-        while True:
-            
-            if not time_flag:
-                self.last_time = time.time()
-                time_flag = True
-            current_time = time.time()
-            if (current_time - self.last_time ) < self.INTERVAL_TIMER:
-                time_flag = False
-                self.hentKjoretimer()
-            time.sleep(self.INTERVAL_TIMER)
     
     def hentKjoretimer(self):
-        self.current_vs = vegvesen_scraper()
-        self.current_classes = self.current_vs.all_classes
-        self.new_flag = True
-        return
-
+        print("Test")
+        vv = vegvesen_scraper()
+        print(vv.all_classes)
     def compareClasses(self):
-<<<<<<< HEAD
         k = 0
     def dateExtractor(self): # Tar imot output fra hentKjoretimer()
         
@@ -59,9 +49,7 @@ class KjoretimeListener:
             print(parsed)
         else:
             return
-    
-=======
-        k=k
+
     def dateExtractor(self,class_list): # Tar imot output fra hentKjoretimer()
         
         if self.new_flag:
@@ -70,9 +58,9 @@ class KjoretimeListener:
 
     def kryperCookie(self):
         import subprocess, base64
-        cookie = subprocess.run(["grep", ".", "./const/cookie"], capture_output=True).stdout[8:-1]
-        encoded_cookie = base64.b64encode(cookie)
+        cookie_file = b".\const\cookie"
+        cookie = open(cookie_file).read()[8:]
+        encoded_cookie = base64.b64encode(cookie.encode("utf-8"))
+        open(cookie_file,"w").write(encoded_cookie.decode("utf-8"))
         
-        return encoded_cookie
     
->>>>>>> 8ddaa2c108514ba8d412a4424ee4f652be5ce715
