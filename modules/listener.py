@@ -50,6 +50,7 @@ class KjoretimeListener:
         return
 
     def compareClasses(self):
+<<<<<<< HEAD
         k = 0
     def dateExtractor(self): # Tar imot output fra hentKjoretimer()
         
@@ -59,3 +60,19 @@ class KjoretimeListener:
         else:
             return
     
+=======
+        k=k
+    def dateExtractor(self,class_list): # Tar imot output fra hentKjoretimer()
+        
+        if self.new_flag:
+            parsed = self.current_vs().InfluxDBify()
+            
+
+    def kryperCookie(self):
+        import subprocess, base64
+        cookie = subprocess.run(["grep", ".", "./const/cookie"], capture_output=True).stdout[8:-1]
+        encoded_cookie = base64.b64encode(cookie)
+        
+        return encoded_cookie
+    
+>>>>>>> 8ddaa2c108514ba8d412a4424ee4f652be5ce715

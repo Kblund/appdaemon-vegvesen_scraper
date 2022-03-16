@@ -8,6 +8,7 @@ from os import path
 
 
 class vegvesen_scraper:
+        cookie_dir = r"./const/cookie"
         params = {"v":2,"arbeidsflytId":452606344,"klasse":"B"} # parametrene "v", arbeidsflytId, klasse
         traffic_stations=[471,741,761,491,751]
         url = "https://forerett-adapter.atlas.vegvesen.no/provetimer"
@@ -20,7 +21,7 @@ class vegvesen_scraper:
         def fetch_class(self,station):
             def decode_cookie():
                 return base64.b64decode(                                                       
-                    open(r"./const/cookie")
+                    open(self.cookie_dir)
                     .read())
 
             """
@@ -42,8 +43,20 @@ class vegvesen_scraper:
                 classes = self.fetch_class(station)
                 if classes:
                   self.all_classes.append(classes)
-                
-        def parse_dict(self,influxDB = False):                                               # Gjør informasjonen leselig for InfluxDB
+
+        def Sorter(self):
+            driving_classes = {}
+            for classes in self.all_classes:
+                currentStation = classes[0]["oppmotested"].split(" ")[0]
+                driving_classes.update({currentStation:[]})
+                print(classes[0]["oppmotested"])
+                for driving_class in classes:
+                    if driving_class:
+                        driving_classes[currentStation].append(driving_class["start"])
+                        kjoretime = driving_class["start"]
+            return driving_classes
+
+        def InfluxDBify(self,influxDB = False):                                               # Gjør informasjonen leselig for InfluxDB
             driving_classes = {}
             for classes in self.all_classes:
                 currentStation = classes[0]["oppmotested"].split(" ")[0]
