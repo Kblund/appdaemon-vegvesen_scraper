@@ -1,22 +1,59 @@
 from email.mime import base
+import appdaemon.plugins.hass.hassapi as hass
 import json, requests, time, base64, datetime
-import InfluxDB_sync
 from os import path
+import ha_version
 import threading
-import time
+import time 
 
 
 
+class vegvesenScrapeNote(hass.Hass):
 
-class vegvesen_scraper:
-        thresh_date = datetime.datetime(2022,3,24)
-        cookie_dir = b".\const\cookie"
+        def initialize(self):
+            self.log(  
+                f"🚨 Launching vegvesen-Notify {ha_version.__version__}",
+                ascii_encode=False,
+           )
+            
+
+           
+           
+        def notifyy(self,event):
+            self.log(f"🎇🎆🎆🎆🎆 Something happened", ascii_encode=False)
+    
+            self.notify( event["start"], 
+            name = "mobile_app_mobiln",
+            title = event["oppmotested"])
+            self.notify( event["start"], 
+            name = "mobile_app_galaxy_watch4_classic_4xwd",
+            title = event["oppmotested"])
+           # will send a message through notify.smtp instead of the default notify.notify
+            
+ 
+
+
+class vegvesen_scraper(hass.Hass):
+    
+        def initialize(self):
+            self.log(  
+                f"🚨 Launching scraper {ha_version.__version__}",
+                ascii_encode=False,
+           )
+            self.all_classes = []
+            timer = datetime.time(0, 0, 0)
+            self.run_minutely(self.callback_minutely, timer)
+        
+        thresh_date = datetime.datetime(2022,3,25)
+        cookie_dir = "/config/appdaemon/apps/vegvesen-scraper/const/cookie"
+        
         params = {"v":2,"arbeidsflytId":452606344,"klasse":"B"} # parametrene "v", arbeidsflytId, klasse
         traffic_stations=[471,741,761,491,751]
         url = "https://forerett-adapter.atlas.vegvesen.no/provetimer"
 
-        def __init__(self):
-            self.all_classes = []
+        def callback_minutely(self, kwargs):
+            self.main()
+
 
         def fetch_class(self,station):
             def decode_cookie():
@@ -31,9 +68,16 @@ class vegvesen_scraper:
             """
             params = self.params                
             params.update(trafikkstasjonId=station)
-            res = requests.get(params = params,url=self.url ,headers=dict(cookie=decode_cookie()))
+            res = requests.get(
+                params = params,
+                url=self.url ,
+                headers={
+                    "cookie": decode_cookie() 
+                    }
+               )
+
             if res.status_code != 200 :
-                print(res.text,res.url)
+                self.log("%s\n%s" % (res.text,res.url),log="error_log")
                 return False
             else:
                 return res.json()
@@ -42,8 +86,11 @@ class vegvesen_scraper:
             if self.all_classes:
                 self.all_classes.clear()                                    # Hjelpefunksjon for å iterere gjennom alle kjørestasjonene
             for station in self.traffic_stations:
+                
                 classes = self.fetch_class(station)
-                if classes:
+                if not classes:
+                    continue
+                else:
                   self.all_classes.append(classes)
             return
 
@@ -96,22 +143,46 @@ class vegvesen_scraper:
             t.daemon = True
             t.start()
             t.join()
+            
+        def is_running(self):
+            message = \
+                """
+            still running..
+                """
+            now = datetime.datetime.now()
+            if now.minute % 20 == 0:
 
-
-if __name__ == '__main__':
-    starttime = time.time()
-    k = vegvesen_scraper()
-
-    clear = "\n" * 3
-    while True:
-        k.cycle_station()
-        print(clear*33)
-        for trafikkstasjon in k.all_classes:
-            for kjoretime in trafikkstasjon:
-                tid = datetime.datetime.strptime(kjoretime["start"], "%Y-%m-%dT%H:%M:%S")
-                if tid >= k.thresh_date:
-                    print("%s %s - %s" % (clear,kjoretime["oppmotested"],kjoretime["start"]))
+                self.log(message)
+        def main(self):
+            starttime = time.time()
+    
+            clear = "\n" * 2
+            self.is_running()
+            self.cycle_station()
+            for trafikkstasjon in self.all_classes:
+                self.log(trafikkstasjon,level= "DEBUG", log="diag_log")
+                stasjon_flag = True # flagg sånn at printen blir finar
+                for kjoretime in trafikkstasjon:
                     
+                    tid = datetime.datetime.strptime(kjoretime["start"], "%Y-%m-%dT%H:%M:%S")
+                    if tid >= self.thresh_date\
+                    and tid.month == 3\
+                    and kjoretime["oppmotested"] == "Orkdal trafikkstasjon":
+                        if isinstance(trafikkstasjon,list):
+                            if stasjon_flag: 
+                    
+                                now =  datetime.datetime.now()
+                                self.log(
+                                    kjoretime["oppmotested"],
+                                    ascii_encode=False
+                                )
 
-
-        time.sleep(30.0- ((time.time() - starttime) % 30.0))
+                                self.log(now.strftime("%H:%M:%S")
+                                      )
+                                stasjon_flag = False
+                            if tid.day >= 28 and kjoretime['oppmotested'] == "Orkdal trafikkstasjon":
+                                vs = self.get_app("vegvesen-notifier")
+                                vs.notifyy(kjoretime)
+                            self.log(kjoretime["start"])
+                                    
+             #   self.log("="*(len(kjoretime["oppmotested"])+1))

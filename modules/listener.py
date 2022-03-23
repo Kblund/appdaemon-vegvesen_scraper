@@ -56,9 +56,9 @@ class KjoretimeListener:
             parsed = self.current_vs().InfluxDBify()
             
 
-    def kryperCookie(self):
+    def kryperCookie():
         import subprocess, base64
-        cookie_file = b".\const\cookie"
+        cookie_file = "/config/appdaemon/apps/vegvesen-scraper/const/cookie"
         cookie = open(cookie_file).read()[8:]
         encoded_cookie = base64.b64encode(cookie.encode("utf-8"))
         open(cookie_file,"w").write(encoded_cookie.decode("utf-8"))
