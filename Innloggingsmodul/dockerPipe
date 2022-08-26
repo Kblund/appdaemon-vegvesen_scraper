@@ -1,0 +1,3 @@
+#!/usr/bin/bash
+projectDir=/usr/share/hassio/homeassistant/custom_components/vegvesen
+while true; do eval "$(cat $projectDir/pipe)"; done
